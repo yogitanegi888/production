@@ -1,0 +1,31 @@
+
+const bcryptjs = require('bcryptjs');
+const { createSecretKey } = require('crypto');
+const jsonwebtoken = require("jsonwebtoken")
+
+
+const AdminModel = require('../Models/AdminModel')
+class AdminService {
+    async AdminRegistation(admin) {
+        admin.password = bcryptjs.hashSync(admin.password, bcryptjs.genSaltSync());
+        let result = await AdminModel.create(admin);
+
+
+    }
+    async login(credentailes) {
+        let Admin = await AdminModel.findOne({ username: credentailes.username });
+        if (!Admin) {
+            console.log("user not found ", 404)
+        } else if (!bcryptjs.compareSync(credentailes.password, Admin.password)) {
+            console.log("Invalid password ", 400)
+
+
+        }
+        let token = jsonwebtoken.sign({ username: Admin.username }, "key", {
+            algorithm: "HS256",
+            expiresIn: 24 * 60 * 60,
+        });
+
+    }
+}
+module.exports = new AdminService()
